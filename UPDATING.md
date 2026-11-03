@@ -24,11 +24,12 @@ assists people when migrating to a new version.
 
 ## Next
 
-- Dashboard and chart `viewers` can no longer be added through the API or the MCP
-  `manage_dashboard_roles` tool while the `ENABLE_VIEWERS` feature flag is off; such
-  requests are rejected with a 422. Enforcement of existing viewers is unchanged (a
-  non-empty viewers list restricts access regardless of the flag), and removing
-  viewers remains possible so stale assignments can be cleared.
+- While the `ENABLE_VIEWERS` feature flag is off, new dashboard and chart `viewers`
+  can no longer be assigned. The REST create/update endpoints reject such requests
+  with a 422; the MCP `manage_dashboard_roles` tool returns an `error` in its
+  response instead. Enforcement of existing viewers is unchanged (a non-empty
+  viewers list restricts access regardless of the flag), and existing viewers can
+  still be kept or removed so stale assignments can be cleared.
 
 - With a Redis Sentinel coordination backend (`DISTRIBUTED_COORDINATION_CONFIG`
   using `RedisSentinelCache`), coordination commands now honor `CACHE_REDIS_DB` and
