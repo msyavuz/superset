@@ -305,6 +305,43 @@ class TestManageDashboardRoles:
         assert any("ENABLE_VIEWERS" in w for w in payload["warnings"])
 
     @patch(IS_FEATURE_ENABLED, return_value=False)
+    @patch(GET_OR_CREATE_ROLE_SUBJECT)
+    @patch(DAO_GET)
+    @patch("superset.extensions.db.session")
+    @pytest.mark.asyncio
+    async def test_swap_role_rejected_when_flag_disabled(
+        self,
+        mock_session: Mock,
+        mock_get: Mock,
+        mock_get_or_create: Mock,
+        mock_flag: Mock,
+        mcp_server: object,
+    ) -> None:
+        """Swapping a role keeps the count but still adds one, so it is rejected."""
+        analyst = _mock_subject(200, 5, "Analyst")
+        sales = _mock_subject(201, 6, "Sales")
+        dash = _mock_dashboard(viewers=[analyst, sales])
+        mock_get.return_value = dash
+
+        async with Client(mcp_server) as client:
+            result = await client.call_tool(
+                "manage_dashboard_roles",
+                {
+                    "request": {
+                        "identifier": 42,
+                        "add_role_ids": [7],
+                        "remove_role_ids": [6],
+                    }
+                },
+            )
+
+        payload = json.loads(result.content[0].text)
+        assert "ENABLE_VIEWERS" in payload["error"]
+        mock_get_or_create.assert_not_called()
+        mock_session.commit.assert_not_called()
+        assert dash.viewers == [analyst, sales]
+
+    @patch(IS_FEATURE_ENABLED, return_value=False)
     @patch(DAO_GET)
     @patch("superset.extensions.db.session")
     @pytest.mark.asyncio

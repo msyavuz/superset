@@ -769,6 +769,24 @@ def test_compute_subjects_rejects_new_viewers_when_flag_disabled(
 
 @patch("superset.commands.utils.is_feature_enabled", return_value=False)
 @patch("superset.commands.utils.compute_subject_list")
+def test_compute_subjects_rejects_swapped_viewer_when_flag_disabled(
+    mock_compute, mock_flag
+):
+    """A same-length replacement still adds a viewer and must be rejected."""
+    model = MagicMock()
+    model.editors = [_make_subject(1)]
+    model.viewers = [_make_subject(2), _make_subject(3)]
+    mock_compute.side_effect = [model.editors, [_make_subject(2), _make_subject(4)]]
+
+    props: dict = {"viewers": [2, 4]}
+    compute_subjects(model, props, exceptions := [])
+
+    assert len(exceptions) == 1
+    assert isinstance(exceptions[0], ViewersDisabledValidationError)
+
+
+@patch("superset.commands.utils.is_feature_enabled", return_value=False)
+@patch("superset.commands.utils.compute_subject_list")
 def test_compute_subjects_allows_removing_viewers_when_flag_disabled(
     mock_compute, mock_flag
 ):

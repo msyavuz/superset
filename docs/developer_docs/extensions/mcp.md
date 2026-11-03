@@ -550,12 +550,13 @@ dashboard's Subject-based `viewers` list) via
 guards against silently widening or narrowing who can see a dashboard,
 which is why `update_dashboard` dropped its `roles` field.
 
-- **`ENABLE_VIEWERS` reporting**: the response reports the flag's current
-  state via `viewers_enabled` and `warnings` notes when it's disabled — but
-  that warning is informational only. `raise_for_access` enforces a
-  nonempty `viewers` list on a published dashboard regardless of the flag,
-  so a role added here restricts access immediately even with
-  `ENABLE_VIEWERS` off. Removing every ROLE-type entry only restores normal
+- **`ENABLE_VIEWERS` off**: `raise_for_access` enforces a nonempty
+  `viewers` list on a published dashboard regardless of the flag, but the
+  UI hides viewers while it is off. So with the flag off, new role
+  assignments are rejected with an error; existing roles can still be kept
+  (re-sent in `add_role_ids`) or removed. The response reports the flag's
+  state via `viewers_enabled`, and `warnings` notes when it's disabled.
+- Removing every ROLE-type entry only restores normal
   permissions if no USER- or GROUP-type viewers remain — since
   `raise_for_access` checks the whole `viewers` list, not just roles, any
   such subjects left on the dashboard keep it restricted.

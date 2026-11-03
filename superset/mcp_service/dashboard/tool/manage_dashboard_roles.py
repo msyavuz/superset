@@ -207,9 +207,9 @@ def manage_dashboard_roles(
     viewers remain on the dashboard — ``raise_for_access`` restricts access
     whenever the ``viewers`` list is nonempty, regardless of subject type.
     This applies regardless of the ``ENABLE_VIEWERS`` feature flag. While the
-    flag is disabled, roles can only be removed: adding a role not already
-    assigned is rejected, since the UI offers no way to see or undo the
-    resulting restriction. The response's ``viewers_enabled`` field reports
+    flag is disabled, new role assignments are rejected (the UI offers no way
+    to see or undo the resulting restriction); existing roles can still be
+    kept or removed. The response's ``viewers_enabled`` field reports
     the flag's state, and ``warnings`` notes when it is disabled.
 
     Roles are the ROLE-type entries in the dashboard's Subject-based
